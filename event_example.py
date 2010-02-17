@@ -1,3 +1,8 @@
+#
+#     This file is part of 'python-moc', a Python music on console interface.
+#     Copyright (c) 2010 Jonas Haag <jonas@lophus.org>.
+#     All rights reserved. See LICENSE for licensing information.
+#
 import mocevent
 
 @mocevent.register('song-changed')

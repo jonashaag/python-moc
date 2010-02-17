@@ -1,3 +1,54 @@
+#
+#     This file is part of 'python-moc', a Python music on console interface.
+#     Copyright (c) 2010 Jonas Haag <jonas@lophus.org>.
+#     All rights reserved. See LICENSE for licensing information.
+#
+"""
+    mocevent - a tiny event system over the moc library
+    ===================================================
+    mocevent is a small library aiming to provide a simple but flexible
+    event system for music on console using the python-moc library.
+
+    With mocevent, you can bind Python functions to events like 'song-changed'
+    or 'moc-started'. For example, if you want a callback function be called
+    whenever moc changes the currently played song, do it with this few lines:
+
+        >>> import mocevent
+        >>> @mocevent.register('song-changed')
+        ... def my_song_changed_callback(info_dict):
+        ...     print "Song has changed to %s" % info_dict['songtitle']
+
+        >>> mocevent.mainloop()
+
+    mocevent now checks every second whether the song has changed, and if it
+    has, it calls the given callback function with the info dictionary known
+    from the python-moc library.
+
+    Of course you can define your own events using mocevent. Let's say you
+    want to have an event called 'in-flames-song-started' that is invoked, as
+    the name says, whenever moc plays a song from the great Melodic Death Metal
+    band 'In Flames'.
+
+        >>> @mocevent.listener('in-flames-song-started')
+        ... def in_flames_song_started_listener(garage, info_dict):
+        ...     previous_song = garage.get('prevsong', None)
+        ...     garage['prevsong'] = info_dict['file']
+        ...     if previous_song == info_dict['file']:
+        ...         # moc is still playing the same file it did when we checked
+        ...         # the last time, so don't emit anything. Just do nothing.
+        ...         return
+        ...     if previous_song and info_dict['artist'] == 'In Flames':
+        ...         # moc is not playing the old file any more, and the played
+        ...         # is from In Flames, so emit the event: return ``True``
+        ...         return True
+
+    TBE
+
+    Now we can register callbacks for that event:
+        >>> @mocevent.register('in-flames-song-started')
+        ... def callback(info_dict):
+        ...     print "You're now listening to %s by In Flames! :-)" % info_dict['songtitle']
+"""
 import time
 from collections import defaultdict
 import moc
@@ -38,7 +89,7 @@ def state_changed_listener(garage, info_dict):
     old_state = garage.get('state', None)
     garage['state'] = info_dict['state']
     if old_state is None:
-        return True 
+        return True
     return info_dict['state'] != old_state
 
 @listener('moc-closed', listen_closed=True)

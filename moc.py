@@ -104,26 +104,17 @@ def is_stopped():
     """ Returns ``True`` if moc is currently stopped. """
     return get_state() == STATE_STOPPED
 
-def stop():
-    """ Stop current playback. """
-    _exec_command('stop')
-
-def next():
-    """ Play next song. """
-    _exec_command('next')
-
-def previous():
-    """
-    Play previous song.
-
-    Aliases: ``previous``, ``prev()``
-    """
-    _exec_command('previous')
-prev = previous
+def play():
+    """ Start playback (at current/first item of the playlist) """
+    _exec_command('play')
 
 def pause():
     """ Pause current playback. """
     _exec_command('pause')
+
+def stop():
+    """ Stop current playback. """
+    _exec_command('stop')
 
 def unpause():
     """
@@ -142,6 +133,19 @@ def toggle_playback():
     """
     _exec_command('toggle-pause')
 toggle_play = toggle_pause = toggle = toggle_playback
+
+def next():
+    """ Play next song. """
+    _exec_command('next')
+
+def previous():
+    """
+    Play previous song.
+
+    Aliases: ``previous``, ``prev()``
+    """
+    _exec_command('previous')
+prev = previous
 
 
 def playlist_append(files_directories_playlists):

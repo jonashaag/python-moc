@@ -82,7 +82,11 @@ def song_changed_listener(garage, info_dict):
     garage['file'] = info_dict.get('file', None)
     if old_song is None:
         return True
-    return info_dict['file'] != old_song
+    try:
+        return info_dict['file'] != old_song
+    except KeyError:
+        # rare, but happens
+        return False
 
 @listener('state-changed')
 def state_changed_listener(garage, info_dict):

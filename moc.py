@@ -6,16 +6,18 @@
 """
     python-moc, a Python music on console interface
     ===============================================
-    python-moc provides a small wrapper over moc's console output. Mainly,
-    it converts the output acquired by
-        mocp --info
-    to a Python dict. It also does some normalization on keys/values.
+    python-moc provides a small wrapper over moc's command-line interface.
 
-    It can be used as follows:
+    It makes all features like playing and enqueuing files and playlist,
+    controlling the playback and getting information about the currently
+    played track available via Python.
+
+    Example usage::
 
         >>> moc.get_state()
-        -1                          # apparently moc is not running, so
-        >>> moc.get_info_dict()     # no output here
+        -1                          # apparently moc is not running, so...
+        >>> moc.get_info_dict()     # ...no output here
+        >>> moc.start_server()
         >>> moc.get_state()         # I started moc, but it's stopped
         0
         >>> moc.get_info_dict()
@@ -37,12 +39,17 @@
          'title': '5 In Flames - The Hive (Whoracle)',
          'totalsec': '243',
          'totaltime': '04:03'}
+        >>> moc.next()
+        >>> moc.pause()
+        >>> moc.resume()
+        >>> moc.toggle_shuffle()
+        >>> moc.enable_repeat()
+        >>> moc.increase_volume(10)
+
+    and so on.
 
 """
 import os
-
-MOC_COMMAND = 'mocp --info 2>/dev/null'
-# The shell command that gets us the information
 
 STATE_NOT_RUNNING = -1
 STATE_STOPPED = 0
@@ -55,41 +62,24 @@ STATES = {
     'PAUSE' : STATE_PAUSED
 }
 
-def _get_moc_info():
-    """ Calls ``MOC_COMMAND`` and returns its output. """
-    return os.popen(MOC_COMMAND).read()
 
-def _moc_output_to_dict(output):
-    """
-    Converts the given moc ``output`` into a dictonary. If the output is empty,
-    return ``None`` instead.
+# Helper functions
+def _quote_parameters(parameters):
+    if isinstance(parameters, str):
+        return '"%s"' % parameters
+    return ' '.join('"%s"' % parameter for parameter in parameters)
 
-    The conversion works as follows:
-        For each line:
-            split the line on first match of a ":"
-            where the first part of the result is the key and the second part
-            is the value.
-            lowercase the key and add the key/value to the dict.
-    """
-    if not output:
-        return
-    return dict((key.lower(), value[1:]) for key, value in
-                (line.split(':', 1) for line in output.strip('\n').split('\n')))
+def _exec_command(command, parameters=''):
+    return os.popen('mocp --%s %s 2>/dev/null' % (command, parameters)).read()
 
-def get_info_dict():
-    """
-    Returns a dictionary with current moc information.
 
-    Gets the dictionary from calling ``moc_output_to_dict`` on the output
-    acquired using ``get_moc_info``, converts the 'state' given in this dict
-    to one of ``STATE_STOPPED``, ``STATE_PAUSED`` or ``STATE_PLAYING`` and
-    returns the dict.
-    """
-    dct = _moc_output_to_dict(_get_moc_info())
-    if dct is None:
-        return
-    dct['state'] = STATES[dct.pop('state')]
-    return dct
+def start_server():
+    """ Start the moc server. """
+    _exec_command('server')
+
+def shutdown_server():
+    """ Shutdown the moc server. """
+    _exec_command('exit')
 
 def get_state():
     """
@@ -113,3 +103,134 @@ def is_playing():
 def is_stopped():
     """ Returns ``True`` if moc is currently stopped. """
     return get_state() == STATE_STOPPED
+
+def stop():
+    """ Stop current playback. """
+    _exec_command('stop')
+
+def next():
+    """ Play next song. """
+    _exec_command('next')
+
+def previous():
+    """
+    Play previous song.
+
+    Aliases: ``previous``, ``prev()``
+    """
+    _exec_command('previous')
+prev = previous
+
+def pause():
+    """ Pause current playback. """
+    _exec_command('pause')
+
+def unpause():
+    """
+    Resume current playback.
+
+    Aliases: ``unpause``, ``resume``
+    """
+    _exec_command('unpause')
+resume = unpause
+
+def toggle_playback():
+    """
+    Toggles playback: If playback was paused, resume; if not, pause.
+
+    Aliases: ``toggle_playback``, ``toggle_play``, ``toggle_pause``, ``toggle``
+    """
+    _exec_command('toggle-pause')
+toggle_play = toggle_pause = toggle = toggle_playback
+
+
+def playlist_append(files_directories_playlists):
+    """
+    Appends the files, directories and/or in ``files_directories_playlists`` to
+    moc's playlist.
+    """
+    _exec_command('append', _quote_parameters(files_directories_playlists))
+append_to_playlist = playlist_append
+
+def playlist_clear():
+    """ Clears moc's playlist. """
+    _exec_command('clear')
+clear_playlist = playlist_clear
+
+def quickplay(files):
+    """ Plays the given ``files`` without modifying moc's playlist. """
+    _exec_command('playit', _quote_parameters(files))
+play = quickplay
+
+
+def _moc_output_to_dict(output):
+    """
+    Converts the given moc ``output`` into a dictonary. If the output is empty,
+    return ``None`` instead.
+
+    The conversion works as follows:
+        For each line:
+            split the line on first match of a ":"
+            where the first part of the result is the key and the second part
+            is the value.
+            lowercase the key and add the key/value to the dict.
+    """
+    if not output:
+        return
+    return dict((key.lower(), value[1:]) for key, value in
+                (line.split(':', 1) for line in output.strip('\n').split('\n')))
+
+def get_info_dict():
+    """
+    Returns a dictionary with information about the track moc currently plays.
+
+    Gets the dictionary from calling ``moc_output_to_dict`` on the output
+    acquired using ``get_moc_info``, converts the 'state' given in this dict
+    to one of ``STATE_STOPPED``, ``STATE_PAUSED`` or ``STATE_PLAYING`` and
+    returns the dict.
+
+    Aliases: ``get_info_dict``, ``info`, ``get_info``, ``current_track_info``
+    """
+    dct = _moc_output_to_dict(_exec_command('info'))
+    if dct is None:
+        return
+    dct['state'] = STATES[dct.pop('state')]
+    return dct
+info = get_info = current_track_info = get_info_dict
+
+
+def increase_volume(level=5):
+    """
+    Increase moc's volume by ``level``.
+
+    Aliases: ``increase_volume``, ``volume_up``, ``louder``, ``upper_volume``
+    """
+    _exec_command('volume', '+%d' % level)
+louder = upper_volume = volume_up = increase_volume
+
+def decrease_volume(level=5):
+    """
+    Decrease moc's volume by ``level``.
+
+    Aliases: ``decrease_volume``, ``volume_down``, ``lower``, ``lower_volume``
+    """
+    _exec_command('volume', '-%d' % level)
+lower = lower_volume = volume_down = decrease_volume
+
+def seek(n):
+    """
+    If ``n`` is positive, move current playback forward by ``n`` seconds.
+    If ``n`` is negative, move current playback backward by ``n`` seconds.
+    """
+    _exec_command('seek', n)
+
+def _controls(what):
+    return (
+        lambda: _exec_command('on', what),
+        lambda: _exec_command('off', what),
+        lambda: _exec_command('toggle', what)
+    )
+
+enable_repeat,   disable_repeat,   toggle_repeat   = _controls('repeat')
+enable_shuffle,  disable_shuffle,  toggle_shuffle  = _controls('shuffle')
+enable_autonext, disable_autonext, toggle_autonext = _controls('autonext')

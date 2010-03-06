@@ -4,8 +4,8 @@
 #     All rights reserved. See LICENSE for licensing information.
 #
 """
-    mocevent - a tiny event system over the moc library
-    ===================================================
+    mocevent - a tiny event system layer over the moc library
+    =========================================================
     mocevent is a small library aiming to provide a simple but flexible
     event system for music on console using the python-moc library.
 

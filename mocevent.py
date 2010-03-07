@@ -6,11 +6,11 @@
 """
     mocevent - a tiny event system layer over the moc library
     =========================================================
-    mocevent is a small library aiming to provide a simple but flexible
+    *mocevent* is a small library aiming to provide a simple but flexible
     event system for music on console using the python-moc library.
 
-    With mocevent, you can bind Python functions to events like 'song-changed'
-    or 'moc-started'. For example, if you want a callback function be called
+    With *mocevent*, you can bind Python functions to events like *'song-changed'*
+    or *'moc-started'*. For example, if you want a callback function be called
     whenever moc changes the currently played song, do it with this few lines:
 
         >>> import mocevent
@@ -22,12 +22,12 @@
 
     mocevent now checks every second whether the song has changed, and if it
     has, it calls the given callback function with the info dictionary known
-    from the python-moc library.
+    from the *python-moc* library.
 
-    Of course you can define your own events using mocevent. Let's say you
-    want to have an event called 'in-flames-song-started' that is invoked, as
+    Of course you can define your own events using *mocevent*. Let's say you
+    want to have an event called *'in-flames-song-started'* that is invoked, as
     the name says, whenever moc plays a song from the great Melodic Death Metal
-    band 'In Flames'.
+    band In Flames.
 
         >>> @mocevent.listener('in-flames-song-started')
         ... def in_flames_song_started_listener(garage, info_dict):
@@ -42,7 +42,8 @@
         ...         # is from In Flames, so emit the event: return ``True``
         ...         return True
 
-    TBE
+    .. todo::
+       Maybe describe the code?
 
     Now we can register callbacks for that event:
         >>> @mocevent.register('in-flames-song-started')
@@ -57,12 +58,13 @@ EVENT_CALLBACKS = defaultdict(list)
 LISTENERS = list()
 
 def register(event_name):
+    """ Decorator used to register a callback for `event_name`. """
     def wrapper(callback):
         EVENT_CALLBACKS[event_name].append(callback)
         return callback
     return wrapper
 
-def emit_event(event_name, *args, **kwargs):
+def _emit_event(event_name, *args, **kwargs):
     for callback in EVENT_CALLBACKS.get(event_name, ()):
         callback(*args, **kwargs)
 
@@ -110,6 +112,12 @@ def moc_started_listener(garage, info_dict):
 
 
 def mainloop(refresh_interval=1):
+    """
+    Runs the *mocevent* mainloop.
+
+    This loop checks every `refresh_interval` seconds whether some event has
+    happened and invokes the callbacks for that event in that case.
+    """
     while True:
         info_dict = moc.get_info_dict()
         for listener_ in LISTENERS:

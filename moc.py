@@ -25,20 +25,20 @@
         >>> moc.get_state()         # I started playing a file
         2
         >>> moc.get_info_dict()
-        {'album': 'Whoracle',
-         'artist': 'In Flames',
-         'avgbitrate': '320kbps',
-         'bitrate': '320kbps',
-         'currentsec': '10',
-         'currenttime': '00:10',
-         'file': '../In Flames/Whoracle/In Flames - The Hive.mp3',
-         'rate': '44kHz',
-         'songtitle': 'The Hive',
-         'state': 2,
-         'timeleft': '03:53',
-         'title': '5 In Flames - The Hive (Whoracle)',
-         'totalsec': '243',
-         'totaltime': '04:03'}
+        {'album'       : 'Whoracle',
+         'artist'      : 'In Flames',
+         'avgbitrate'  : '320kbps',
+         'bitrate'     : '320kbps',
+         'currentsec'  : '10',
+         'currenttime' : '00:10',
+         'file'        : '.../In Flames/Whoracle/In Flames - The Hive.mp3',
+         'rate'        : '44kHz',
+         'songtitle'   : 'The Hive',
+         'state'       : 2, # STATE_PLAYING
+         'timeleft'    : '03:53',
+         'title'       : '5 In Flames - The Hive (Whoracle)',
+         'totalsec'    : '243',
+         'totaltime'   : '04:03'}
         >>> moc.next()
         >>> moc.pause()
         >>> moc.resume()
@@ -74,11 +74,11 @@ def _exec_command(command, parameters=''):
 
 
 def start_server():
-    """ Start the moc server. """
+    """ Starts the moc server. """
     _exec_command('server')
 
 def shutdown_server():
-    """ Shutdown the moc server. """
+    """ Shuts down the moc server. """
     _exec_command('exit')
 
 def get_state():
@@ -97,7 +97,7 @@ def is_paused():
     return get_state() == STATE_PAUSED
 
 def is_playing():
-    """ Returns `` True`` if moc is currently in playing state. """
+    """ Returns ``True`` if moc is currently in playing state. """
     return get_state() == STATE_PLAYING
 
 def is_stopped():
@@ -105,22 +105,22 @@ def is_stopped():
     return get_state() == STATE_STOPPED
 
 def play():
-    """ Start playback (at current/first item of the playlist) """
+    """ Starts playback (at current/first item of the playlist). """
     _exec_command('play')
 
 def pause():
-    """ Pause current playback. """
+    """ Pauses current playback. """
     _exec_command('pause')
 
 def stop():
-    """ Stop current playback. """
+    """ Stops current playback. """
     _exec_command('stop')
 
 def unpause():
     """
-    Resume current playback.
+    Resumes current playback.
 
-    Aliases: ``unpause``, ``resume``
+    Aliases: ``unpause()``, ``resume()``
     """
     _exec_command('unpause')
 resume = unpause
@@ -129,20 +129,20 @@ def toggle_playback():
     """
     Toggles playback: If playback was paused, resume; if not, pause.
 
-    Aliases: ``toggle_playback``, ``toggle_play``, ``toggle_pause``, ``toggle``
+    Aliases: ``toggle_playback()``, ``toggle_play()``, ``toggle_pause()``, ``toggle()``
     """
     _exec_command('toggle-pause')
 toggle_play = toggle_pause = toggle = toggle_playback
 
 def next():
-    """ Play next song. """
+    """ Plays next track. """
     _exec_command('next')
 
 def previous():
     """
-    Play previous song.
+    Plays previous track.
 
-    Aliases: ``previous``, ``prev()``
+    Aliases: ``previous()``, ``prev()``
     """
     _exec_command('previous')
 prev = previous
@@ -150,7 +150,7 @@ prev = previous
 
 def playlist_append(files_directories_playlists):
     """
-    Appends the files, directories and/or in ``files_directories_playlists`` to
+    Appends the files, directories and/or in `files_directories_playlists` to
     moc's playlist.
     """
     _exec_command('append', _quote_parameters(files_directories_playlists))
@@ -162,14 +162,14 @@ def playlist_clear():
 clear_playlist = playlist_clear
 
 def quickplay(files):
-    """ Plays the given ``files`` without modifying moc's playlist. """
+    """ Plays the given `files` without modifying moc's playlist. """
     _exec_command('playit', _quote_parameters(files))
 play = quickplay
 
 
 def _moc_output_to_dict(output):
     """
-    Converts the given moc ``output`` into a dictonary. If the output is empty,
+    Converts the given moc `output` into a dictonary. If the output is empty,
     return ``None`` instead.
 
     The conversion works as follows:
@@ -187,13 +187,26 @@ def _moc_output_to_dict(output):
 def get_info_dict():
     """
     Returns a dictionary with information about the track moc currently plays.
+    If moc's not playing any track right now (stopped/shut down), returns ``None``.
 
-    Gets the dictionary from calling ``moc_output_to_dict`` on the output
-    acquired using ``get_moc_info``, converts the 'state' given in this dict
-    to one of ``STATE_STOPPED``, ``STATE_PAUSED`` or ``STATE_PLAYING`` and
-    returns the dict.
+    The returned dict looks like this::
 
-    Aliases: ``get_info_dict``, ``info`, ``get_info``, ``current_track_info``
+        {'album'       : 'Whoracle',
+         'artist'      : 'In Flames',
+         'avgbitrate'  : '320kbps',
+         'bitrate'     : '320kbps',
+         'currentsec'  : '10',
+         'currenttime' : '00:10',
+         'file'        : '.../In Flames/Whoracle/In Flames - The Hive.mp3',
+         'rate'        : '44kHz',
+         'songtitle'   : 'The Hive',
+         'state'       : 2, # STATE_PLAYING
+         'timeleft'    : '03:53',
+         'title'       : '5 In Flames - The Hive (Whoracle)',
+         'totalsec'    : '243',
+         'totaltime'   : '04:03'}
+
+    Aliases: ``get_info_dict()``, ``info()``, ``get_info()``, ``current_track_info()``
     """
     dct = _moc_output_to_dict(_exec_command('info'))
     if dct is None:
@@ -205,35 +218,32 @@ info = get_info = current_track_info = get_info_dict
 
 def increase_volume(level=5):
     """
-    Increase moc's volume by ``level``.
+    Increases moc's volume by `level`.
 
-    Aliases: ``increase_volume``, ``volume_up``, ``louder``, ``upper_volume``
+    Aliases: ``increase_volume()``, ``volume_up()``, ``louder()``, ``upper_volume()``
     """
     _exec_command('volume', '+%d' % level)
 louder = upper_volume = volume_up = increase_volume
 
 def decrease_volume(level=5):
     """
-    Decrease moc's volume by ``level``.
+    Decreases moc's volume by `level`.
 
-    Aliases: ``decrease_volume``, ``volume_down``, ``lower``, ``lower_volume``
+    Aliases: ``decrease_volume()``, ``volume_down()``, ``lower()``, ``lower_volume()``
     """
     _exec_command('volume', '-%d' % level)
 lower = lower_volume = volume_down = decrease_volume
 
 def seek(n):
     """
-    If ``n`` is positive, move current playback forward by ``n`` seconds.
-    If ``n`` is negative, move current playback backward by ``n`` seconds.
+    If `n` is positive, move current playback forward by `n` seconds.
+    If `n` is negative, move current playback backward by `n` seconds.
     """
     _exec_command('seek', n)
 
 def _controls(what):
-    return (
-        lambda: _exec_command('on', what),
-        lambda: _exec_command('off', what),
-        lambda: _exec_command('toggle', what)
-    )
+    makefunc = lambda action: lambda: _exec_command(ac )
+    return (makefunc(action) for action in ('on', 'off', 'toggle'))
 
 enable_repeat,   disable_repeat,   toggle_repeat   = _controls('repeat')
 enable_shuffle,  disable_shuffle,  toggle_shuffle  = _controls('shuffle')

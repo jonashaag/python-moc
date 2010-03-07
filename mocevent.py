@@ -64,7 +64,7 @@ def register(event_name):
         return callback
     return wrapper
 
-def _emit_event(event_name, *args, **kwargs):
+def emit_event(event_name, *args, **kwargs):
     for callback in EVENT_CALLBACKS.get(event_name, ()):
         callback(*args, **kwargs)
 

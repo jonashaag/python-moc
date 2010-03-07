@@ -33,3 +33,18 @@ changed for instance the currently played track.
    mocevent
    usage examples <examples>
 
+
+Bugs, feature requests and current development version
+------------------------------------------------------
+Python MOC uses github_ as version control system and bug tracker and so on.
+
+You can get the current development version from github_ using :command:`git clone`::
+
+    git clone git://github.com/jonashaag/python-moc
+
+Please file bugs and feature requests using the `github ticket system`_.
+
+I'm glad to get any kind of feedback! (critics, thanks, ideas, feature requests, blah)
+
+.. _github: http://github.com/jonashaag/python-moc
+.. _github ticket system: http://github.com/jonashaag/python-moc/issues

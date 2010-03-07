@@ -57,12 +57,21 @@ import moc
 EVENT_CALLBACKS = defaultdict(list)
 LISTENERS = list()
 
-def register(event_name):
-    """ Decorator used to register a callback for `event_name`. """
-    def wrapper(callback):
+def register(event_name, callback=None):
+    """
+    Decorator used to register a callback for `event_name`.
+
+    Aliases: ``register``, ``register_callback``
+    """
+    if callback is not None:
         EVENT_CALLBACKS[event_name].append(callback)
         return callback
-    return wrapper
+    else:
+        def wrapper(callback):
+            EVENT_CALLBACKS[event_name].append(callback)
+            return callback
+        return wrapper
+register_callback = register
 
 def emit_event(event_name, *args, **kwargs):
     for callback in EVENT_CALLBACKS.get(event_name, ()):

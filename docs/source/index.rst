@@ -12,7 +12,7 @@ moc_. It currently consist of two modules:
 
 A mocp Python interface
 -----------------------
-The :mod:`moc` wraps the ``mocp`` console interface and provides
+The :mod:`moc` module wraps the ``mocp`` console interface and provides
 an API to all actions listed in ``mocp --help``.
 
 .. toctree::

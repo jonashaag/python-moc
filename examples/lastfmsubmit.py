@@ -10,8 +10,8 @@ def submit_to_lastfm(song_info):
     try:
         print "Scrobbling %(songtitle)s by %(artist)s..." % song_info
         CLIENT.submit({
-            'artist' : song_info['artist'],
-            'title'  : song_info['songtitle'],
+            'artist' : song_info['artist'].decode('utf-8'),
+            'title'  : song_info['songtitle'].decode('utf-8'),
             'album'  : song_info['album'],
             'length' : int(song_info['totalsec']),
             'time'   : time.gmtime()

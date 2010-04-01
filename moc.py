@@ -236,13 +236,13 @@ lower = lower_volume = volume_down = decrease_volume
 
 def seek(n):
     """
-    If `n` is positive, move current playback forward by `n` seconds.
-    If `n` is negative, move current playback backward by `n` seconds.
+    Moves the current playback seed forward by `n` seconds
+    (or backward if `n` is negative).
     """
     _exec_command('seek', n)
 
 def _controls(what):
-    makefunc = lambda action: lambda: _exec_command(ac )
+    makefunc = lambda action: lambda: _exec_command(action)
     return (makefunc(action) for action in ('on', 'off', 'toggle'))
 
 enable_repeat,   disable_repeat,   toggle_repeat   = _controls('repeat')

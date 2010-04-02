@@ -39,7 +39,7 @@
         ...         return
         ...     if previous_song and info_dict['artist'] == 'In Flames':
         ...         # moc is not playing the old file any more, and the played
-        ...         # is from In Flames, so emit the event: return ``True``
+        ...         # file is from In Flames, so emit the event: return ``True``
         ...         return True
 
     .. todo::

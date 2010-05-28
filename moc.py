@@ -181,8 +181,11 @@ def _moc_output_to_dict(output):
     """
     if not output:
         return
+    lines = output.strip('\n').split('\n')
+    if 'Running the server...' in lines[0]:
+        del lines[0]
     return dict((key.lower(), value[1:]) for key, value in
-                (line.split(':', 1) for line in output.strip('\n').split('\n')))
+                (line.split(':', 1) for line in lines))
 
 def get_info_dict():
     """

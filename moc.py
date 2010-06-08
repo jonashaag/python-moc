@@ -49,7 +49,7 @@
     and so on.
 
 """
-import os
+import subprocess
 
 STATE_NOT_RUNNING = -1
 STATE_STOPPED = 0
@@ -70,7 +70,14 @@ def _quote_parameters(parameters):
     return ' '.join('"%s"' % parameter for parameter in parameters)
 
 def _exec_command(command, parameters=''):
-    return os.popen('mocp --%s %s 2>/dev/null' % (command, parameters)).read()
+    cmd = subprocess.Popen(
+            ['mocp', '--%s' %(command), '%s' %(parameters)],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+    stdout, stderr = cmd.communicate()
+    if cmd.returncode:
+        return
+    return stdout
 
 
 def start_server():

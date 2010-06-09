@@ -283,12 +283,12 @@ def get_playlist(mocdir=None):
     playlist = playlist[2:]
     start = 0
     _playlist = dict()
-    for count in xrange(1, (len(playlist[2:]) / 2) + 1):
+    for count in xrange(len(playlist) / 2):
         end = start + 2
         extinfo, fullpath = playlist[start:end]
         extinfo = extinfo.split(',', 1)[1]
         _playlist.setdefault(
-                count,
+                count + 1,
                 {
                     extinfo.rstrip(): fullpath.rstrip()
                 }

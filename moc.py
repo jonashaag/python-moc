@@ -49,6 +49,7 @@
     and so on.
 
 """
+import os
 import subprocess
 
 STATE_NOT_RUNNING = -1
@@ -258,3 +259,40 @@ def _controls(what):
 enable_repeat,   disable_repeat,   toggle_repeat   = _controls('repeat')
 enable_shuffle,  disable_shuffle,  toggle_shuffle  = _controls('shuffle')
 enable_autonext, disable_autonext, toggle_autonext = _controls('autonext')
+
+def get_playlist(mocdir=None):
+    """
+    Get the current playlist and returns it as dict.
+    """
+    if not mocdir:
+        mocdir = os.path.expanduser('~/.moc')
+    playlist_path = os.path.join(mocdir, 'playlist.m3u')
+    try:
+        playlist_file = open(playlist_path, 'r', 1)
+    except IOError:
+        return None
+    else:
+        playlist = playlist_file.readlines()
+        playlist_file.close()
+    playlist_format, mocserial = playlist[:2]
+    if not (
+            playlist_format.startswith('#EXTM3U') and
+            mocserial.startswith('#MOCSERIAL:')
+    ):
+        return None
+    playlist = playlist[2:]
+    start = 0
+    _playlist = dict()
+    for count in xrange(1, (len(playlist[2:]) / 2) + 1):
+        end = start + 2
+        extinfo, fullpath = playlist[start:end]
+        extinfo = extinfo.split(',', 1)[1]
+        _playlist.setdefault(
+                count,
+                {
+                    extinfo.rstrip(): fullpath.rstrip()
+                }
+        )
+        start = end
+    return _playlist
+

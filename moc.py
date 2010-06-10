@@ -290,7 +290,6 @@ def get_playlist(mocdir=None):
 
     with open(playlist_path, 'r', 1) as playlist_file:
         playlist = playlist_file.readlines()
-        playlist_file.close()
 
     #the first two lines must be the m3u format
     #and the serial for this playlist.

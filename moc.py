@@ -265,16 +265,15 @@ enable_autonext, disable_autonext, toggle_autonext = _controls('autonext')
 
 def get_playlist(mocdir=None):
     """
-    Get the current playlist and returns it as a tuple of tuples.
+    Returns the current playlist or ``None`` if none does exist.
 
-    The returned tuple has the following format:
+    The returned list has the following format:
 
-    (
-        (playlist_position_1, mp3_title, absolute_path_of_file),
-        (playlist_position_2, mp3_title, absolute_path_of_file),
-        (playlist_position_3, mp3_title, absolute_path_of_file),
+    [
+        (mp3_title, absolute_path_of_file),
+        (mp3_title, absolute_path_of_file),
         ...
-    )
+    ]
 
     """
     if not mocdir:
@@ -282,81 +281,31 @@ def get_playlist(mocdir=None):
 
     playlist_path = os.path.join(mocdir, 'playlist.m3u')
 
-    #the with statement does not prevents from exceptions
-    #so we must at least look if the euid can access
-    #and read the file. If not, it returns None
-    if not os.access(playlist_path, os.R_OK):
+    if not os.path.exists(playlist_path):
         return None
 
-    with open(playlist_path, 'r', 1) as playlist_file:
-        playlist = playlist_file.readlines()
+    with open(playlist_path, 'r') as playlist_file:
+        # read the first two lines of the file:
+        header = [playlist_file.next() for i in xrange(2)]
+        # the first two lines must be the m3u format id
+        # and the serial for this playlist, e.g.
+        #     #EXTM3U
+        #     #MOCSERIAL: n
+        # If not, it is not a moc created playlist
+        # and we return None.
+        if not header[0].startswith('#EXTM3U') or \
+           not header[1].startswith('#MOCSERIAL'):
+            return None
 
-    #the first two lines must be the m3u format
-    #and the serial for this playlist.
-    #If not, it is not a moc created playlist
-    #and we return None.
-    playlist_format, mocserial = playlist[:2]
-    if not (
-            playlist_format.startswith('#EXTM3U') and
-            mocserial.startswith('#MOCSERIAL:')
-    ):
-        return None
-
-    playlist = playlist[2:]
-    start = 0
-    _playlist = tuple()
-
-    #Every entry for a song counts two lines.
-    #So we slice two entrys of the tuple,
-    #beginning with position 0 to 2 and set the
-    #startpoint for the next run to the endpoint
-    #of the previous run.
-    for count in xrange(len(playlist) / 2):
-        end = start + 2
-        extinfo, fullpath = playlist[start:end]
-        extinfo = extinfo.split(',', 1)[1]
-        _playlist += ((count + 1, extinfo.rstrip(), fullpath.rstrip()),)
-        start = end
-    return _playlist or None
-
-def get_playlist_dict(mocdir=None):
-    """
-    Get the current playlist and returns it as a dict.
-
-    The returned dict looks like:
-
-    {1: {'path': 'the absolut path to the first song',
-         'title': 'the title of the first song'},
-     2: {'path': 'the absolut path to the second song',
-         'title': 'the title of the second song'}}
-
-    Now you can do something like that:
-
-    >>> import moc
-    >>> pl = moc.get_playlist_dict()
-    >>> pl.get(1).get('title')
-    'the title of the first song'
-    >>> pl.get(1).get('path')
-    'the absolut path to the first song'
-
-    To prevent exceptions while access non-existing
-    playlist entries do the following:
-
-    >>> pl.get(3, dict()).get('title')
-    None
-
-    """
-    #TODO write a own class to handle the 'get' method better
-
-
-    playlist = get_playlist(mocdir)
-    if not playlist:
-        return None
-    _playlist = dict()
-    for playlist_position, title, path in playlist:
-        _playlist.setdefault(
-                playlist_position,
-                {'title': title, 'path': path}
-        )
-    return _playlist
-
+        # ok, everything seems to be fine with this file,
+        # go on putting the rest of the content into our
+        # own fancy datastructures:
+        playlist = []
+        for line in playlist_file:
+            # Every entry for a song counts two lines:
+            #     #EXTINF:n,m song_title
+            #     absolute_file_path
+            title = line.split(' ', 1)[1] # split at the first ' '
+            path = playlist_file.next()
+            playlist.append((title.strip('\r\n'), path.strip('\r\n')))
+        return playlist

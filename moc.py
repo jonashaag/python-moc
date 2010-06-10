@@ -275,6 +275,7 @@ def get_playlist(mocdir=None):
         ...
     ]
 
+    Contributed by Robin Wittler. Thanks!
     """
     if not mocdir:
         mocdir = os.path.expanduser('~/.moc')

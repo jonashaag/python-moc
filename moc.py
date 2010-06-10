@@ -159,19 +159,6 @@ def previous():
 prev = previous
 
 
-def playlist_append(files_directories_playlists):
-    """
-    Appends the files, directories and/or in `files_directories_playlists` to
-    moc's playlist.
-    """
-    _exec_command('append', _quote_parameters(files_directories_playlists))
-append_to_playlist = playlist_append
-
-def playlist_clear():
-    """ Clears moc's playlist. """
-    _exec_command('clear')
-clear_playlist = playlist_clear
-
 def quickplay(files):
     """ Plays the given `files` without modifying moc's playlist. """
     _exec_command('playit', _quote_parameters(files))
@@ -263,19 +250,17 @@ enable_repeat,   disable_repeat,   toggle_repeat   = _controls('repeat')
 enable_shuffle,  disable_shuffle,  toggle_shuffle  = _controls('shuffle')
 enable_autonext, disable_autonext, toggle_autonext = _controls('autonext')
 
-def get_playlist(mocdir=None):
+def playlist_get(mocdir=None):
     """
     Returns the current playlist or ``None`` if none does exist.
 
-    The returned list has the following format:
+    The returned list has the following format::
 
-    [
-        (mp3_title, absolute_path_of_file),
-        (mp3_title, absolute_path_of_file),
-        ...
-    ]
+        [(title, absolute_path_of_file), (title, absolute_path_of_file), ...]
 
     Contributed by Robin Wittler. Thanks!
+
+    Aliases: ``playlist_get``, ``get_playlist``
     """
     if not mocdir:
         mocdir = os.path.expanduser('~/.moc')
@@ -310,3 +295,17 @@ def get_playlist(mocdir=None):
             path = playlist_file.next()
             playlist.append((title.strip('\r\n'), path.strip('\r\n')))
         return playlist
+get_playlist = playlist_get
+
+def playlist_append(files_directories_playlists):
+    """
+    Appends the files, directories and/or in `files_directories_playlists` to
+    moc's playlist.
+    """
+    _exec_command('append', _quote_parameters(files_directories_playlists))
+append_to_playlist = playlist_append
+
+def playlist_clear():
+    """ Clears moc's playlist. """
+    _exec_command('clear')
+clear_playlist = playlist_clear

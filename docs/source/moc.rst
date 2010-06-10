@@ -46,6 +46,7 @@ Controlling the playback
 
 Working with playlists
 ----------------------
+.. autofunction:: playlist_get
 .. autofunction:: playlist_append
 .. autofunction:: playlist_clear
 

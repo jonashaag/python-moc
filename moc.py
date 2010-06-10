@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+from __future__ import with_statement
 #
 #     This file is part of 'python-moc', a Python music on console interface.
 #     Copyright (c) 2010 Jonas Haag <jonas@lophus.org>.
@@ -72,8 +74,9 @@ def _quote_parameters(parameters):
 
 def _exec_command(command, parameters=''):
     cmd = subprocess.Popen(
-            ['mocp', '--%s' %(command), '%s' %(parameters)],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ['mocp --%s %s' %(command, parameters)],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            shell=True, close_fds=True
     )
     stdout, stderr = cmd.communicate()
     if cmd.returncode:
@@ -262,37 +265,99 @@ enable_autonext, disable_autonext, toggle_autonext = _controls('autonext')
 
 def get_playlist(mocdir=None):
     """
-    Get the current playlist and returns it as dict.
+    Get the current playlist and returns it as a tuple of tuples.
+
+    The returned tuple has the following format:
+
+    (
+        (playlist_position_1, mp3_title, absolute_path_of_file),
+        (playlist_position_2, mp3_title, absolute_path_of_file),
+        (playlist_position_3, mp3_title, absolute_path_of_file),
+        ...
+    )
+
     """
     if not mocdir:
         mocdir = os.path.expanduser('~/.moc')
+
     playlist_path = os.path.join(mocdir, 'playlist.m3u')
-    try:
-        playlist_file = open(playlist_path, 'r', 1)
-    except IOError:
+
+    #the with statement does not prevents from exceptions
+    #so we must at least look if the euid can access
+    #and read the file. If not, it returns None
+    if not os.access(playlist_path, os.R_OK):
         return None
-    else:
+
+    with open(playlist_path, 'r', 1) as playlist_file:
         playlist = playlist_file.readlines()
         playlist_file.close()
+
+    #the first two lines must be the m3u format
+    #and the serial for this playlist.
+    #If not, it is not a moc created playlist
+    #and we return None.
     playlist_format, mocserial = playlist[:2]
     if not (
             playlist_format.startswith('#EXTM3U') and
             mocserial.startswith('#MOCSERIAL:')
     ):
         return None
+
     playlist = playlist[2:]
     start = 0
-    _playlist = dict()
+    _playlist = tuple()
+
+    #Every entry for a song counts two lines.
+    #So we slice two entrys of the tuple,
+    #beginning with position 0 to 2 and set the
+    #startpoint for the next run to the endpoint
+    #of the previous run.
     for count in xrange(len(playlist) / 2):
         end = start + 2
         extinfo, fullpath = playlist[start:end]
         extinfo = extinfo.split(',', 1)[1]
-        _playlist.setdefault(
-                count + 1,
-                {
-                    extinfo.rstrip(): fullpath.rstrip()
-                }
-        )
+        _playlist += ((count + 1, extinfo.rstrip(), fullpath.rstrip()),)
         start = end
+    return _playlist or None
+
+def get_playlist_dict(mocdir=None):
+    """
+    Get the current playlist and returns it as a dict.
+
+    The returned dict looks like:
+
+    {1: {'path': 'the absolut path to the first song',
+         'title': 'the title of the first song'},
+     2: {'path': 'the absolut path to the second song',
+         'title': 'the title of the second song'}}
+
+    Now you can do something like that:
+
+    >>> import moc
+    >>> pl = moc.get_playlist_dict()
+    >>> pl.get(1).get('title')
+    'the title of the first song'
+    >>> pl.get(1).get('path')
+    'the absolut path to the first song'
+
+    To prevent exceptions while access non-existing
+    playlist entries do the following:
+
+    >>> pl.get(3, dict()).get('title')
+    None
+
+    """
+    #TODO write a own class to handle the 'get' method better
+
+
+    playlist = get_playlist(mocdir)
+    if not playlist:
+        return None
+    _playlist = dict()
+    for playlist_position, title, path in playlist:
+        _playlist.setdefault(
+                playlist_position,
+                {'title': title, 'path': path}
+        )
     return _playlist
 

@@ -242,7 +242,7 @@ def seek(n):
     _exec_command('seek', n)
 
 def _controls(what):
-    makefunc = lambda action: lambda: _exec_command(action)
+    makefunc = lambda action: lambda: _exec_command(action, what) and None or None
     return (makefunc(action) for action in ('on', 'off', 'toggle'))
 
 enable_repeat,   disable_repeat,   toggle_repeat   = _controls('repeat')

@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+from __future__ import with_statement
 #
 #     This file is part of 'python-moc', a Python music on console interface.
 #     Copyright (c) 2010 Jonas Haag <jonas@lophus.org>.
@@ -50,6 +52,7 @@
 
 """
 import os
+import subprocess
 
 STATE_NOT_RUNNING = -1
 STATE_STOPPED = 0
@@ -70,7 +73,15 @@ def _quote_parameters(parameters):
     return ' '.join('"%s"' % parameter for parameter in parameters)
 
 def _exec_command(command, parameters=''):
-    return os.popen('mocp --%s %s 2>/dev/null' % (command, parameters)).read()
+    cmd = subprocess.Popen(
+            ['mocp --%s %s' %(command, parameters)],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+            shell=True, close_fds=True
+    )
+    stdout, stderr = cmd.communicate()
+    if cmd.returncode:
+        return
+    return stdout
 
 
 def start_server():
@@ -148,19 +159,6 @@ def previous():
 prev = previous
 
 
-def playlist_append(files_directories_playlists):
-    """
-    Appends the files, directories and/or in `files_directories_playlists` to
-    moc's playlist.
-    """
-    _exec_command('append', _quote_parameters(files_directories_playlists))
-append_to_playlist = playlist_append
-
-def playlist_clear():
-    """ Clears moc's playlist. """
-    _exec_command('clear')
-clear_playlist = playlist_clear
-
 def quickplay(files):
     """ Plays the given `files` without modifying moc's playlist. """
     _exec_command('playit', _quote_parameters(files))
@@ -181,8 +179,11 @@ def _moc_output_to_dict(output):
     """
     if not output:
         return
+    lines = output.strip('\n').split('\n')
+    if 'Running the server...' in lines[0]:
+        del lines[0]
     return dict((key.lower(), value[1:]) for key, value in
-                (line.split(':', 1) for line in output.strip('\n').split('\n')))
+                (line.split(':', 1) for line in lines))
 
 def get_info_dict():
     """
@@ -248,3 +249,63 @@ def _controls(what):
 enable_repeat,   disable_repeat,   toggle_repeat   = _controls('repeat')
 enable_shuffle,  disable_shuffle,  toggle_shuffle  = _controls('shuffle')
 enable_autonext, disable_autonext, toggle_autonext = _controls('autonext')
+
+def playlist_get(mocdir=None):
+    """
+    Returns the current playlist or ``None`` if none does exist.
+
+    The returned list has the following format::
+
+        [(title, absolute_path_of_file), (title, absolute_path_of_file), ...]
+
+    Contributed by Robin Wittler. Thanks!
+
+    Aliases: ``playlist_get``, ``get_playlist``
+    """
+    if not mocdir:
+        mocdir = os.path.expanduser('~/.moc')
+
+    playlist_path = os.path.join(mocdir, 'playlist.m3u')
+
+    if not os.path.exists(playlist_path):
+        return None
+
+    with open(playlist_path, 'r') as playlist_file:
+        # read the first two lines of the file:
+        header = [playlist_file.next() for i in xrange(2)]
+        # the first two lines must be the m3u format id
+        # and the serial for this playlist, e.g.
+        #     #EXTM3U
+        #     #MOCSERIAL: n
+        # If not, it is not a moc created playlist
+        # and we return None.
+        if not header[0].startswith('#EXTM3U') or \
+           not header[1].startswith('#MOCSERIAL'):
+            return None
+
+        # ok, everything seems to be fine with this file,
+        # go on putting the rest of the content into our
+        # own fancy datastructures:
+        playlist = []
+        for line in playlist_file:
+            # Every entry for a song counts two lines:
+            #     #EXTINF:n,m song_title
+            #     absolute_file_path
+            title = line.split(' ', 1)[1] # split at the first ' '
+            path = playlist_file.next()
+            playlist.append((title.strip('\r\n'), path.strip('\r\n')))
+        return playlist
+get_playlist = playlist_get
+
+def playlist_append(files_directories_playlists):
+    """
+    Appends the files, directories and/or in `files_directories_playlists` to
+    moc's playlist.
+    """
+    _exec_command('append', _quote_parameters(files_directories_playlists))
+append_to_playlist = playlist_append
+
+def playlist_clear():
+    """ Clears moc's playlist. """
+    _exec_command('clear')
+clear_playlist = playlist_clear

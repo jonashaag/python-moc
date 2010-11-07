@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from __future__ import with_statement
 #
 #     This file is part of 'python-moc', a Python music on console interface.
 #     Copyright (c) 2010 Jonas Haag <jonas@lophus.org>.
@@ -51,6 +50,7 @@ from __future__ import with_statement
     and so on.
 
 """
+from __future__ import with_statement
 import os
 import subprocess
 
@@ -65,6 +65,8 @@ STATES = {
     'PAUSE' : STATE_PAUSED
 }
 
+class MocError(Exception):
+    """ Raised if executing a command failed """
 
 # Helper functions
 def _quote_parameters(parameters):
@@ -80,16 +82,15 @@ def _exec_command(command, parameters=''):
     )
     stdout, stderr = cmd.communicate()
     if cmd.returncode:
-        return
+        raise MocError(stderr.strip())
     return stdout
-
 
 def start_server():
     """ Starts the moc server. """
     _exec_command('server')
 
-def shutdown_server():
-    """ Shuts down the moc server. """
+def stop_server():
+    """ Shuts down the moc server.  """
     _exec_command('exit')
 
 def get_state():
@@ -160,7 +161,14 @@ prev = previous
 
 
 def quickplay(files):
-    """ Plays the given `files` without modifying moc's playlist. """
+    """
+    Plays the given `files` without modifying moc's playlist.
+
+    Raises an :exc:`OSError` if any of the `files` can not be found.
+    """
+    for file in files:
+        if not os.path.exists(file):
+            raise OSError("Can not play file %r: File does not exist" % file)
     _exec_command('playit', _quote_parameters(files))
 play = quickplay
 

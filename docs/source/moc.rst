@@ -63,4 +63,4 @@ Various other functions
 Controlling the server
 ----------------------
 .. autofunction:: start_server
-.. autofunction:: shutdown_server
+.. autofunction:: stop_server

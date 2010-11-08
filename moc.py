@@ -68,6 +68,9 @@ STATES = {
 class MocError(Exception):
     """ Raised if executing a command failed """
 
+class MocNotRunning(MocError):
+    """ Raised if a command failed because the moc server does not run """
+
 # Helper functions
 def _quote_parameters(parameters):
     if isinstance(parameters, str):
@@ -82,7 +85,11 @@ def _exec_command(command, parameters=''):
     )
     stdout, stderr = cmd.communicate()
     if cmd.returncode:
-        raise MocError(stderr.strip())
+        errmsg = stderr.strip()
+        if 'server is not running' in errmsg:
+            raise MocNotRunning(errmsg)
+        else:
+            raise MocError(errmsg)
     return stdout
 
 def start_server():
@@ -101,7 +108,7 @@ def get_state():
     """
     try:
         return get_info_dict()['state']
-    except TypeError:
+    except MocNotRunning:
         return STATE_NOT_RUNNING
 
 def is_paused():
@@ -220,7 +227,7 @@ def get_info_dict():
     dct = _moc_output_to_dict(_exec_command('info'))
     if dct is None:
         return
-    dct['state'] = STATES[dct.pop('state')]
+    dct['state'] = STATES[dct['state']]
     return dct
 info = get_info = current_track_info = get_info_dict
 

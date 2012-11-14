@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 import time
-import mocevent
+import moc
 from lastfm.client import Client as LastFmClient
 
 CLIENT = LastFmClient('python-moc-example')
 
-@mocevent.register('song-changed')
+@moc.event.register('song-changed')
 def submit_to_lastfm(song_info):
     try:
         print "Scrobbling %(songtitle)s by %(artist)s..." % song_info
@@ -21,4 +21,4 @@ def submit_to_lastfm(song_info):
         pass
 
 if __name__ == '__main__':
-    mocevent.mainloop()
+    moc.event.mainloop()

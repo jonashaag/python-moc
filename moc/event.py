@@ -1,55 +1,3 @@
-#
-#     This file is part of 'python-moc', a Python music on console interface.
-#     Copyright (c) 2010 Jonas Haag <jonas@lophus.org>.
-#     All rights reserved. See LICENSE for licensing information.
-#
-"""
-    mocevent - a tiny event system layer on top of the moc library
-    ==============================================================
-    *mocevent* is a small library aiming to provide a simple but flexible
-    event system for music on console using the python-moc library.
-
-    With *mocevent*, you can bind Python functions to events like *'song-changed'*
-    or *'moc-started'*. For example, if you want a callback function be called
-    whenever moc changes the currently played song, do it with this few lines:
-
-        >>> import mocevent
-        >>> @mocevent.register('song-changed')
-        ... def my_song_changed_callback(info_dict):
-        ...     print "Song has changed to %s" % info_dict['songtitle']
-
-        >>> mocevent.mainloop()
-
-    mocevent now checks every second whether the song has changed, and if it
-    has, it calls the given callback function with the info dictionary known
-    from the *python-moc* library.
-
-    Of course you can define your own events using *mocevent*. Let's say you
-    want to have an event called *'in-flames-song-started'* that is invoked, as
-    the name says, whenever moc plays a song from the great Melodic Death Metal
-    band In Flames.
-
-        >>> @mocevent.listener('in-flames-song-started')
-        ... def in_flames_song_started_listener(garage, info_dict):
-        ...     previous_song = garage.get('prevsong', None)
-        ...     garage['prevsong'] = info_dict['file']
-        ...     if previous_song == info_dict['file']:
-        ...         # moc is still playing the same file it did when we checked
-        ...         # the last time, so don't emit anything. Just do nothing.
-        ...         return
-        ...     if previous_song and info_dict['artist'] == 'In Flames':
-        ...         # moc is not playing the old file any more, and the played
-        ...         # file is from In Flames, so emit the event: return ``True``
-        ...         return True
-
-    .. todo::
-       Maybe describe the code?
-
-    Now we can register callbacks for that event:
-        >>> @mocevent.register('in-flames-song-started')
-        ... def callback(info_dict):
-        ...     print "You're now listening to %s by In Flames! :-)" % info_dict['songtitle']
-"""
 import time
 from collections import defaultdict
 import moc
@@ -108,10 +56,10 @@ def state_changed_listener(garage, info_dict):
     return info_dict['state'] != old_state
 
 @listener('moc-closed', listen_closed=True)
-def moc_quitted_listener(garage, info_dict):
-    was_quitted_before = garage.get('quitted', None)
-    garage['quitted'] = info_dict is None
-    return was_quitted_before is False and info_dict is None
+def moc_quit_listener(garage, info_dict):
+    was_quit_before = garage.get('quit', None)
+    garage['quit'] = info_dict is None
+    return was_quit_before is False and info_dict is None
 
 @listener('moc-started', listen_closed=True)
 def moc_started_listener(garage, info_dict):
@@ -122,10 +70,10 @@ def moc_started_listener(garage, info_dict):
 
 def mainloop(refresh_interval=1):
     """
-    Runs the *mocevent* mainloop.
+    Runs the *moc.event* mainloop.
 
-    This loop checks every `refresh_interval` seconds whether some event has
-    happened and invokes the callbacks for that event in that case.
+    This loop polls every `refresh_interval` seconds to check whether some
+    event has happened and invokes the callbacks for that event in that case.
     """
     while True:
         info_dict = moc.get_info_dict()

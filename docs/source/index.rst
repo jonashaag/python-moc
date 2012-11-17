@@ -1,50 +1,56 @@
-.. Python Music On Console documentation master file, created by
-   sphinx-quickstart on Sat Mar  6 21:43:05 2010.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
-
 Python Music On Console
 =======================
-*Python Music On Console* is a wrapper over the amazing console music player
-moc_. It currently consist of two modules:
+*Python Music On Console* is a wrapper around the amazing console music player
+moc_.
+
+It can be used to play and enqueue files and playlists, control playback,
+get information about the currently played track, etc.
+
+.. code-block:: python
+
+    >>> moc.start_server()
+    >>> moc.quickplay(list_of_files)
+    >>> moc.get_info_dict() =>
+    {'album'       : 'Whoracle',
+     'artist'      : 'In Flames',
+     'songtitle'   : 'The Hive',
+     'file'        : '.../In Flames/Whoracle/In Flames - The Hive.mp3',
+     'timeleft'    : '03:53',
+     'totaltime'   : '04:03', ...}
+
+    >>> moc.next()
+    >>> moc.pause()
+    >>> moc.resume()
+    >>> moc.is_playing()
+    >>> moc.toggle_shuffle()
+    >>> moc.enable_repeat()
+    >>> moc.increase_volume(10)
+        ...
 
 .. _moc: http://moc.daper.net
 
-A mocp Python interface
------------------------
-The :mod:`moc` package wraps the ``mocp`` console interface and provides
-an API to all actions listed in ``mocp --help``.
 
+API reference
+-------------
 .. toctree::
    :maxdepth: 3
 
    moc
-
-
-An event system based on the interface
---------------------------------------
-The :mod:`moc.event` module is a tiny and dynamic event system based on
-the :mod:`moc` package. It makes you able to execute callbacks when moc
-changed for instance the currently played track.
-
-.. toctree::
-   :maxdepth: 3
-
    moc.event
-   usage examples <examples>
 
 
 Bugs, feature requests and current development version
 ------------------------------------------------------
-Python MOC uses github_ as version control system and bug tracker and so on.
+*Python Music On Console* uses Github_ as version control system and bug tracker
+and so on.
 
-You can get the current development version from github_ using :command:`git clone`::
+You can get the current development version from Github_ using :command:`git clone`::
 
     git clone git://github.com/jonashaag/python-moc
 
-Please file bugs and feature requests using the `github ticket system`_.
+Please file bugs and feature requests using the `Github ticket system`_.
 
-I'm glad to get any kind of feedback! (critics, thanks, ideas, feature requests, blah)
+I'm glad to get any kind of feedback! (critique, thanks, ideas, feature requests, blah)
 
-.. _github: http://github.com/jonashaag/python-moc
-.. _github ticket system: http://github.com/jonashaag/python-moc/issues
+.. _Github: http://github.com/jonashaag/python-moc
+.. _Github ticket system: http://github.com/jonashaag/python-moc/issues

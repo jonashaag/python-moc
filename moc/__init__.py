@@ -1,55 +1,4 @@
 #!/usr/bin/env python
-#
-#     This file is part of 'python-moc', a Python music on console interface.
-#     Copyright (c) 2010 Jonas Haag <jonas@lophus.org>.
-#     All rights reserved. See LICENSE for licensing information.
-#
-"""
-    python-moc, a Python music on console interface
-    ===============================================
-    python-moc provides a small wrapper over moc's command-line interface.
-
-    It makes all features like playing and enqueuing files and playlist,
-    controlling the playback and getting information about the currently
-    played track available via Python.
-
-    Example usage::
-
-        >>> moc.get_state()
-        -1                          # apparently moc is not running, so...
-        >>> moc.get_info_dict()     # ...no output here
-        >>> moc.start_server()
-        >>> moc.get_state()         # I started moc, but it's stopped
-        0
-        >>> moc.get_info_dict()
-        {'state': 0}
-        >>> moc.get_state()         # I started playing a file
-        2
-        >>> moc.get_info_dict()
-        {'album'       : 'Whoracle',
-         'artist'      : 'In Flames',
-         'avgbitrate'  : '320kbps',
-         'bitrate'     : '320kbps',
-         'currentsec'  : '10',
-         'currenttime' : '00:10',
-         'file'        : '.../In Flames/Whoracle/In Flames - The Hive.mp3',
-         'rate'        : '44kHz',
-         'songtitle'   : 'The Hive',
-         'state'       : 2, # STATE_PLAYING
-         'timeleft'    : '03:53',
-         'title'       : '5 In Flames - The Hive (Whoracle)',
-         'totalsec'    : '243',
-         'totaltime'   : '04:03'}
-        >>> moc.next()
-        >>> moc.pause()
-        >>> moc.resume()
-        >>> moc.toggle_shuffle()
-        >>> moc.enable_repeat()
-        >>> moc.increase_volume(10)
-
-    and so on.
-
-"""
 from __future__ import with_statement
 import os
 import subprocess
@@ -112,23 +61,19 @@ def get_state():
         return STATE_NOT_RUNNING
 
 def is_paused():
-    """ Returns ``True`` if moc is currently paused. """
     return get_state() == STATE_PAUSED
 
 def is_playing():
-    """ Returns ``True`` if moc is currently in playing state. """
     return get_state() == STATE_PLAYING
 
 def is_stopped():
-    """ Returns ``True`` if moc is currently stopped. """
     return get_state() == STATE_STOPPED
 
 def play():
-    """ Starts playback (at current/first item of the playlist). """
+    """ Restarts playback after it's been stopped. """
     _exec_command('play')
 
 def pause():
-    """ Pauses current playback. """
     _exec_command('pause')
 
 def stop():
@@ -137,8 +82,6 @@ def stop():
 
 def unpause():
     """
-    Resumes current playback.
-
     Aliases: ``unpause()``, ``resume()``
     """
     _exec_command('unpause')
@@ -177,7 +120,6 @@ def quickplay(files):
         if not os.path.exists(file):
             raise OSError("Can not play file %r: File does not exist" % file)
     _exec_command('playit', _quote_parameters(files))
-play = quickplay
 
 
 def _moc_output_to_dict(output):
@@ -234,8 +176,6 @@ info = get_info = current_track_info = get_info_dict
 
 def increase_volume(level=5):
     """
-    Increases moc's volume by `level`.
-
     Aliases: ``increase_volume()``, ``volume_up()``, ``louder()``, ``upper_volume()``
     """
     _exec_command('volume', '+%d' % level)
@@ -243,8 +183,6 @@ louder = upper_volume = volume_up = increase_volume
 
 def decrease_volume(level=5):
     """
-    Decreases moc's volume by `level`.
-
     Aliases: ``decrease_volume()``, ``volume_down()``, ``lower()``, ``lower_volume()``
     """
     _exec_command('volume', '-%d' % level)

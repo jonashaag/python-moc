@@ -12,7 +12,7 @@ moc_. It currently consist of two modules:
 
 A mocp Python interface
 -----------------------
-The :mod:`moc` module wraps the ``mocp`` console interface and provides
+The :mod:`moc` package wraps the ``mocp`` console interface and provides
 an API to all actions listed in ``mocp --help``.
 
 .. toctree::
@@ -23,14 +23,14 @@ an API to all actions listed in ``mocp --help``.
 
 An event system based on the interface
 --------------------------------------
-The :mod:`mocevent` module is a tiny and dynamic event system based on
-the :mod:`moc` module. It makes you able to execute callbacks when moc
+The :mod:`moc.event` module is a tiny and dynamic event system based on
+the :mod:`moc` package. It makes you able to execute callbacks when moc
 changed for instance the currently played track.
 
 .. toctree::
    :maxdepth: 3
 
-   mocevent
+   moc.event
    usage examples <examples>
 
 

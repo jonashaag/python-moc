@@ -247,9 +247,9 @@ def playlist_get(mocdir=None):
         playlist = []
         for line in playlist_file:
             # Every entry for a song counts two lines:
-            #     #EXTINF:n,m song_title
+            #     #EXTINF:n,song_title
             #     absolute_file_path
-            title = line.split(' ', 1)[1] # split at the first ' '
+            title = line.split(',', 1)[1]
             path = playlist_file.next()
             playlist.append((title.strip('\r\n'), path.strip('\r\n')))
         return playlist

@@ -42,7 +42,7 @@ def _exec_command(command, parameters=''):
     )
     stdout, stderr = cmd.communicate()
     if cmd.returncode:
-        errmsg = stderr.strip()
+        errmsg = stderr.strip().decode('utf-8')
         if 'server is not running' in errmsg:
             raise MocNotRunning(errmsg)
         else:

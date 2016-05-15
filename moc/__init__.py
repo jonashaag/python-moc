@@ -141,6 +141,8 @@ def _moc_output_to_dict(output):
     """
     if not output:
         return
+    elif type(output) == bytes:
+        output = output.decode('utf-8')
     lines = output.strip('\n').split('\n')
     if 'Running the server...' in lines[0]:
         del lines[0]

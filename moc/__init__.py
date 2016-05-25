@@ -31,7 +31,7 @@ def _quote_file_args(files):
             # (See `is_url` in `files.c`.)
             quoted.append('"%s"' % file)
         else:
-            raise OSError("File %r does not exist" % file)
+            pass
     return ' '.join(quoted)
 
 def _exec_command(command, parameters=''):
@@ -122,7 +122,7 @@ def quickplay(files):
     """
     Plays the given `files` without modifying moc's playlist.
 
-    Raises an :exc:`OSError` if any of the `files` can not be found.
+    Doesn't care if any of the `files` can not be found.
     """
     _exec_command('playit', _quote_file_args(files))
 

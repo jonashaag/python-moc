@@ -162,6 +162,10 @@ def find_and_play(*paths):
     - paths: filename and dirname globs that either are audio files, or contain
       audio files
     """
+    if get_state() == STATE_NOT_RUNNING:
+        start_server()
+    if get_state() in (STATE_PLAYING, STATE_PAUSED):
+        stop()
     _exec_command('playit', ' '.join(find_audio(*paths)))
 
 

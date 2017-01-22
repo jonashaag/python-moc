@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 from __future__ import with_statement
 import os
+import re
 import subprocess
+from datetime import timedelta
 
 STATE_NOT_RUNNING = -1
 STATE_STOPPED = 0
@@ -14,6 +16,8 @@ STATES = {
     'PAUSE' : STATE_PAUSED
 }
 
+RX_HMS = re.compile(r'^((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?$')
+RX_COLON = re.compile(r'^((?P<hours>\d+):)?(?P<minutes>\d+):(?P<seconds>\d+)$')
 class MocError(Exception):
     """ Raised if executing a command failed """
 
@@ -201,6 +205,33 @@ def seek(n):
     (or backward if `n` is negative).
     """
     _exec_command('seek', n)
+
+def go(timestamp):
+    """Jump to timestamp in the current file and play (wrapper to 'seek')
+
+    - timestamp: a string in one the following formats: '3h4m5s', '2h15s', '47m',
+      '300s', '3:04:05', '2:00:15', '47:00', '300'
+    """
+    try:
+        seconds = int(timestamp)
+    except ValueError:
+        try:
+            match_dict = RX_HMS.match(timestamp).groupdict()
+        except AttributeError:
+            try:
+                match_dict = RX_COLON.match(timestamp).groupdict()
+            except AttributeError:
+                return
+        td_kwargs = {
+            k: int(v)
+            for k, v in match_dict.items()
+            if v is not None
+        }
+        seconds = timedelta(**td_kwargs).seconds
+
+    if get_state() == STATE_PAUSED:
+        toggle_pause()
+    seek(seconds - int(get_info_dict()['currentsec']))
 
 def _controls(what):
     makefunc = lambda action: lambda: _exec_command(action, what) and None or None

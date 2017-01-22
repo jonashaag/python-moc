@@ -184,6 +184,23 @@ def get_info_dict():
     return dct
 info = get_info = current_track_info = get_info_dict
 
+def info_string(template='{currenttime} ({currentsec}) of {totaltime} into {file}'):
+    """Return a formatted string from current info in `get_info_dict()` call
+
+    Available vars are keys returned by `get_info_dict()`: album artist
+    avgbitrate bitrate currentsec currenttime file rate songtitle state
+    timeleft title totalsec totaltime
+    """
+    info_dict = get_info_dict()
+    result = ''
+    try:
+        result = template.format(**info_dict)
+    except KeyError as e:
+        if not info_dict:
+            result = 'No file'
+        else:
+            result = repr(e)
+    return result
 
 def increase_volume(level=5):
     """

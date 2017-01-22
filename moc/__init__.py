@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 from datetime import timedelta
+from glob import glob
 
 STATE_NOT_RUNNING = -1
 STATE_STOPPED = 0
@@ -18,6 +19,10 @@ STATES = {
 
 RX_HMS = re.compile(r'^((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?$')
 RX_COLON = re.compile(r'^((?P<hours>\d+):)?(?P<minutes>\d+):(?P<seconds>\d+)$')
+AUDIO_EXTENSIONS = (
+    '.mp3'
+)
+
 class MocError(Exception):
     """ Raised if executing a command failed """
 
@@ -120,6 +125,44 @@ def previous():
     """
     _exec_command('previous')
 prev = previous
+
+
+def find_audio(*paths):
+    """Return a list of audio files from the given paths
+
+    - paths: filename and dirname globs that either are audio files, or contain
+      audio files
+    """
+    visited = set()
+    audio_files = list()
+
+    for path in paths:
+        abspaths = glob(os.path.abspath(os.path.expanduser(path)))
+        for abspath in abspaths:
+            if os.path.isdir(abspath) and abspath not in visited:
+                for dirpath, dirnames, filenames in os.walk(abspath):
+                    visited.add(dirpath)
+                    audio_files.extend([
+                        repr(os.path.join(dirpath, f))
+                        for f in filenames
+                        if f.lower().endswith(AUDIO_EXTENSIONS)
+                    ])
+            elif (
+                os.path.isfile(abspath)
+                and abspath.lower().endswith(AUDIO_EXTENSIONS)
+                and abspath not in audio_files
+            ):
+                audio_files.append(repr(abspath))
+    return audio_files
+
+
+def find_and_play(*paths):
+    """Find all audio files at the given paths and play
+
+    - paths: filename and dirname globs that either are audio files, or contain
+      audio files
+    """
+    _exec_command('playit', ' '.join(find_audio(*paths)))
 
 
 def quickplay(files):

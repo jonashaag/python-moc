@@ -23,7 +23,7 @@ class MocNotRunning(MocError):
 # Helper functions
 def _quote_file_args(files):
     if isinstance(files, str):
-        raise TypeError("Argument must be a list/iterable, not str")
+        files = [files]
     quoted = []
     for file in files:
         if os.path.exists(file) or file.startswith(('http://', 'ftp://')):

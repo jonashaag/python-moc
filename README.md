@@ -1,5 +1,5 @@
-python-moc
-==========
+mocp
+====
 
 A Python library to control the MOC (music on console) audio player for Linux.
 
@@ -9,7 +9,7 @@ A Python library to control the MOC (music on console) audio player for Linux.
 #### Install
 
 ```
-% pip install git+git://github.com/kenjyco/python-moc.git
+% pip install mocp
 ```
 
 #### Use

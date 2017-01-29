@@ -1,10 +1,9 @@
-mocp
-====
+The [actual player](https://moc.daper.net/) must be installed on the
+system (i.e. `sudo apt-get install moc` or `brew install moc`).
 
-A Python library to control the MOC (music on console) audio player for Linux.
-
-> Note: The [actual player](https://moc.daper.net/) must be installed on the
-> system (i.e. `sudo apt-get install moc`).
+> Note: if using a Mac, you need to run [jack](http://www.jackaudio.org/) in
+> another terminal (i.e. `jackd -d coreaudio`). If moc was installed with
+> [homebrew](http://brew.sh/), jack should have been installed as a requirement.
 
 #### Install
 
@@ -12,7 +11,7 @@ A Python library to control the MOC (music on console) audio player for Linux.
 % pip install mocp
 ```
 
-#### Use
+#### Usage
 
 ```
 % ipython

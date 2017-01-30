@@ -90,28 +90,15 @@ def play():
     """ Restarts playback after it's been stopped. """
     _exec_command('play')
 
-def pause():
-    _exec_command('pause')
-
 def stop():
     """ Stops current playback. """
     _exec_command('stop')
 
-def unpause():
-    """
-    Aliases: ``unpause()``, ``resume()``
-    """
-    _exec_command('unpause')
-resume = unpause
-
-def toggle_playback():
+def toggle_pause():
     """
     Toggles playback: If playback was paused, resume; if not, pause.
-
-    Aliases: ``toggle_playback()``, ``toggle_play()``, ``toggle_pause()``, ``toggle()``
     """
     _exec_command('toggle-pause')
-toggle_play = toggle_pause = toggle = toggle_playback
 
 def next():
     """ Plays next track. """
@@ -120,11 +107,8 @@ def next():
 def previous():
     """
     Plays previous track.
-
-    Aliases: ``previous()``, ``prev()``
     """
     _exec_command('previous')
-prev = previous
 
 
 def find_audio(*paths):
@@ -221,15 +205,12 @@ def get_info_dict():
          'title'       : '5 In Flames - The Hive (Whoracle)',
          'totalsec'    : '243',
          'totaltime'   : '04:03'}
-
-    Aliases: ``get_info_dict()``, ``info()``, ``get_info()``, ``current_track_info()``
     """
     dct = _moc_output_to_dict(_exec_command('info'))
     if dct is None:
         return
     dct['state'] = STATES[dct['state']]
     return dct
-info = get_info = current_track_info = get_info_dict
 
 def info_string(template='{currenttime} ({currentsec}) of {totaltime} into {file}'):
     """Return a formatted string from current info in `get_info_dict()` call
@@ -249,19 +230,15 @@ def info_string(template='{currenttime} ({currentsec}) of {totaltime} into {file
             result = repr(e)
     return result
 
-def increase_volume(level=5):
+def volume_up(level=5):
     """
-    Aliases: ``increase_volume()``, ``volume_up()``, ``louder()``, ``upper_volume()``
     """
     _exec_command('volume', '+%d' % level)
-louder = upper_volume = volume_up = increase_volume
 
-def decrease_volume(level=5):
+def volume_down(level=5):
     """
-    Aliases: ``decrease_volume()``, ``volume_down()``, ``lower()``, ``lower_volume()``
     """
     _exec_command('volume', '-%d' % level)
-lower = lower_volume = volume_down = decrease_volume
 
 def seek(n):
     """
@@ -301,9 +278,9 @@ def _controls(what):
     makefunc = lambda action: lambda: _exec_command(action, what) and None or None
     return (makefunc(action) for action in ('on', 'off', 'toggle'))
 
-enable_repeat,   disable_repeat,   toggle_repeat   = _controls('repeat')
-enable_shuffle,  disable_shuffle,  toggle_shuffle  = _controls('shuffle')
-enable_autonext, disable_autonext, toggle_autonext = _controls('autonext')
+toggle_repeat   = _controls('repeat')
+toggle_shuffle  = _controls('shuffle')
+toggle_autonext = _controls('autonext')
 
 def playlist_get(mocdir=None):
     """
@@ -314,8 +291,6 @@ def playlist_get(mocdir=None):
         [(title, absolute_path_of_file), (title, absolute_path_of_file), ...]
 
     Contributed by Robin Wittler. Thanks!
-
-    Aliases: ``playlist_get``, ``get_playlist``
     """
     if not mocdir:
         mocdir = os.path.expanduser('~/.moc')
@@ -350,7 +325,6 @@ def playlist_get(mocdir=None):
             path = playlist_file.next()
             playlist.append((title.strip('\r\n'), path.strip('\r\n')))
         return playlist
-get_playlist = playlist_get
 
 def playlist_append(files_directories_playlists):
     """
@@ -358,9 +332,7 @@ def playlist_append(files_directories_playlists):
     moc's playlist.
     """
     _exec_command('append', _quote_file_args(files_directories_playlists))
-append_to_playlist = playlist_append
 
 def playlist_clear():
     """ Clears moc's playlist. """
     _exec_command('clear')
-clear_playlist = playlist_clear

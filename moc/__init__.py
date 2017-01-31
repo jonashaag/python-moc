@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 from __future__ import with_statement
 import os
-import re
 import subprocess
-from datetime import timedelta
+import input_helper as ih
 from glob import glob
 
 STATE_NOT_RUNNING = -1
@@ -17,8 +16,6 @@ STATES = {
     'PAUSE' : STATE_PAUSED
 }
 
-RX_HMS = re.compile(r'^((?P<hours>\d+)h)?((?P<minutes>\d+)m)?((?P<seconds>\d+)s)?$')
-RX_COLON = re.compile(r'^((?P<hours>\d+):)?(?P<minutes>\d+):(?P<seconds>\d+)$')
 AUDIO_EXTENSIONS = (
     '.mp3'
 )
@@ -253,22 +250,9 @@ def go(timestamp):
     - timestamp: a string in one the following formats: '3h4m5s', '2h15s', '47m',
       '300s', '3:04:05', '2:00:15', '47:00', '300'
     """
-    try:
-        seconds = int(timestamp)
-    except ValueError:
-        try:
-            match_dict = RX_HMS.match(timestamp).groupdict()
-        except AttributeError:
-            try:
-                match_dict = RX_COLON.match(timestamp).groupdict()
-            except AttributeError:
-                return
-        td_kwargs = {
-            k: int(v)
-            for k, v in match_dict.items()
-            if v is not None
-        }
-        seconds = timedelta(**td_kwargs).seconds
+    seconds = ih.timestamp_to_seconds(timestamp)
+    if seconds is None:
+        return
 
     if get_state() == STATE_PAUSED:
         toggle_pause()

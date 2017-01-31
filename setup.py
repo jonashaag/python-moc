@@ -8,16 +8,19 @@ with open('README.rst', 'r') as fp:
 
 setup(
     name='mocp',
-    version='0.3.1',
+    version='0.3.2',
     description='A Python library to control the MOC (music on console) audio player',
     long_description=long_description,
     author='Jonas Haag, Ken',
     author_email='kenjyco@gmail.com',
     license='BSD',
     url='https://github.com/kenjyco/mocp',
-    download_url='https://github.com/kenjyco/mocp/tarball/v0.3.1',
+    download_url='https://github.com/kenjyco/mocp/tarball/v0.3.2',
     packages=find_packages(),
     include_package_data=True,
+    install_requires=[
+        'input-helper',
+    ],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Environment :: Console',

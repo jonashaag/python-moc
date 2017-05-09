@@ -118,14 +118,17 @@ def find_audio(*paths):
     audio_files = list()
 
     for path in paths:
-        abspaths = glob(os.path.abspath(os.path.expanduser(path)))
+        abspath = os.path.abspath(os.path.expanduser(path))
+        abspaths = glob(abspath)
+        if os.path.isdir(abspath) and abspath not in abspaths:
+            abspaths.append(abspath)
         for abspath in abspaths:
             if os.path.isdir(abspath) and abspath not in visited:
                 for dirpath, dirnames, filenames in os.walk(abspath):
                     visited.add(dirpath)
                     audio_files.extend([
                         repr(os.path.join(dirpath, f))
-                        for f in filenames
+                        for f in sorted(filenames)
                         if f.lower().endswith(AUDIO_EXTENSIONS)
                     ])
             elif (

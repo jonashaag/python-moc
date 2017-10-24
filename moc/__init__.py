@@ -153,6 +153,26 @@ def find_and_play(*paths):
     _exec_command('playit', ' '.join(find_audio(*paths)))
 
 
+def find_select_and_play(*paths):
+    """Find all audio files at the given paths, select interactiely, and play
+
+    - paths: filename and dirname globs that either are audio files, or contain
+      audio files
+    """
+    results = find_audio(*paths)
+    if results:
+        selected = ih.make_selections(
+            results,
+            wrap=False
+        )
+        if selected:
+            if get_state() == STATE_NOT_RUNNING:
+                start_server()
+            if get_state() in (STATE_PLAYING, STATE_PAUSED):
+                stop()
+            _exec_command('playit', ' '.join(selected))
+
+
 def quickplay(files):
     """
     Plays the given `files` without modifying moc's playlist.

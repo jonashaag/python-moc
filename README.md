@@ -1,22 +1,36 @@
-The [actual player](https://moc.daper.net/) must be installed on the
-system (i.e. `sudo apt-get install moc` or `brew install moc`).
+## Install
+
+Install the actual [MOC player/server](https://moc.daper.net/)
+
+```
+% sudo apt-get install -y moc
+
+or
+
+% brew install moc
+% jackd -d coreaudio
+```
 
 > Note: if using a Mac, you need to run [jack](http://www.jackaudio.org/) in
-> another terminal (i.e. `jackd -d coreaudio`). If moc was installed with
-> [homebrew](http://brew.sh/), jack should have been installed as a requirement.
+> another terminal EVERY TIME (i.e. `jackd -d coreaudio`).
 
-#### Install
-
-```
-% pip install mocp
-```
-
-#### Usage
+Verify that the MOC server can start
 
 ```
-% ipython
-...
+% mocp
+```
 
+> Press `q` to quit.
+
+Install with `pip`
+
+```
+% pip3 install mocp
+```
+
+## Usage
+
+```python
 In [1]: import moc
 
 In [2]: moc.find_and_play('~/music-dir/blah*')

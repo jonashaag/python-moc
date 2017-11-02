@@ -50,14 +50,19 @@ def _exec_command(command, parameters=''):
     if cmd.returncode:
         errmsg = stderr.strip().decode('utf-8')
         if 'server is not running' in errmsg:
-            raise MocNotRunning(errmsg)
+            start_server()
         else:
             raise MocError(errmsg)
     return stdout
 
 def start_server():
     """ Starts the moc server. """
-    _exec_command('server')
+    try:
+        _exec_command('server')
+    except MocError as e:
+        if "already running with pid" in repr(e):
+            os.remove(os.path.expanduser('~/.moc/pid'))
+            _exec_command('server')
 
 def stop_server():
     """ Shuts down the moc server.  """
@@ -245,7 +250,7 @@ def info_string(template='{currenttime} ({currentsec}) of {totaltime} into {file
     result = ''
     try:
         result = template.format(**info_dict)
-    except KeyError as e:
+    except (KeyError, TypeError) as e:
         if not info_dict:
             result = 'No file'
         else:

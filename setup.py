@@ -20,6 +20,7 @@ setup(
     include_package_data=True,
     install_requires=[
         'input-helper',
+        'bg-helper',
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',

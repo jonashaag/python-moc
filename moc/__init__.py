@@ -146,6 +146,8 @@ def go(timestamp):
     output = bh.run_output('mocp --jump {}s'.format(seconds))
     if 'server is not running' in output:
         start_server()
+    elif 'Segmentation fault' in output:
+        seek(seconds - int(get_info_dict()['currentsec']))
     elif output:
         print(output)
 

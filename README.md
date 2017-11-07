@@ -8,19 +8,7 @@ Install the actual [MOC player/server](https://moc.daper.net/)
 or
 
 % brew install moc
-% jackd -d coreaudio
 ```
-
-> Note: if using a Mac, you need to run [jack](http://www.jackaudio.org/) in
-> another terminal EVERY TIME (i.e. `jackd -d coreaudio`).
-
-Verify that the MOC server can start
-
-```
-% mocp
-```
-
-> Press `q` to quit.
 
 Install with `pip`
 

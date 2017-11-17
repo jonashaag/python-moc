@@ -206,3 +206,7 @@ def stop_server():
         pass
     elif output:
         print(output)
+    else:
+        bh.SimpleBackgroundTask("for pid in $(ps aux | grep jackd | awk '{print $2}'); do kill $pid &>/dev/null; done")
+        sleep(.5)
+        bh.SimpleBackgroundTask("for pid in $(ps aux | grep jackd | awk '{print $2}'); do kill -9 $pid &>/dev/null; done")

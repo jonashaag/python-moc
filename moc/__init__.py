@@ -10,13 +10,24 @@ AUDIO_EXTENSIONS = (
 )
 
 
+def _start_jack():
+    """Start jackd if on a Mac and it's not running"""
+    bh.SimpleBackgroundTask('[[ $(uname) == "Darwin" ]] && [[ -z "$(ps aux | grep jackd | grep -v grep)" ]] && jackd -d coreaudio &>/dev/null')
+
+
+def rm_pid_and_kill_jack():
+    bh.SimpleBackgroundTask("rm ~/.moc/pid 2>/dev/null")
+    bh.SimpleBackgroundTask("for pid in $(ps aux | grep jackd | awk '{print $2}'); do kill $pid &>/dev/null; done")
+    sleep(.5)
+    bh.SimpleBackgroundTask("for pid in $(ps aux | grep jackd | awk '{print $2}'); do kill -9 $pid &>/dev/null; done")
+
+
 def start_server():
     output = bh.run_output('mocp --server')
     if 'Server is already running' in output:
         pass
     elif 'No valid sound driver' in output:
-        # Start jackd if on Mac and it's not running
-        bh.SimpleBackgroundTask('[[ $(uname) == "Darwin" ]] && [[ -z "$(ps aux | grep jackd | grep -v grep)" ]] && jackd -d coreaudio &>/dev/null')
+        _start_jack()
         sleep(.5)
         print(bh.run_output('mocp --server'))
     elif output:
@@ -207,6 +218,4 @@ def stop_server():
     elif output:
         print(output)
     else:
-        bh.SimpleBackgroundTask("for pid in $(ps aux | grep jackd | awk '{print $2}'); do kill $pid &>/dev/null; done")
-        sleep(.5)
-        bh.SimpleBackgroundTask("for pid in $(ps aux | grep jackd | awk '{print $2}'); do kill -9 $pid &>/dev/null; done")
+        rm_pid_and_kill_jack()

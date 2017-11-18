@@ -22,7 +22,7 @@ def rm_pid_and_kill_jack():
     bh.SimpleBackgroundTask("for pid in $(ps aux | grep jackd | awk '{print $2}'); do kill -9 $pid &>/dev/null; done")
 
 
-def start_server():
+def start_server(n=1, max_calls=3):
     output = bh.run_output('mocp --server')
     if 'Server is already running' in output:
         pass
@@ -30,8 +30,16 @@ def start_server():
         _start_jack()
         sleep(.5)
         print(bh.run_output('mocp --server'))
+    elif 'It seems that the server is already running' in output:
+        rm_pid_and_kill_jack()
+        if n < max_calls:
+            start_server(n + 1)
+        else:
+            print(output)
+            print('\nstart_server func was called {} times'.format(n))
     elif output:
         print(output)
+
 
 
 def get_info_dict():

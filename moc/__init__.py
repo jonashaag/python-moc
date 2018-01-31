@@ -113,7 +113,7 @@ def find_and_play(*paths):
 
 
 def find_select_and_play(*paths):
-    """Find all audio files at the given paths, select interactiely, and play
+    """Find all audio files at the given paths, select interactively, and play
 
     - paths: filename and dirname globs that either are audio files, or contain
       audio files

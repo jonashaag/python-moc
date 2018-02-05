@@ -23,13 +23,13 @@ def rm_pid_and_kill_jack():
 
 
 def start_server(n=1, max_calls=3):
-    output = bh.run_output('mocp --server')
+    output = bh.run_output('mocp --server', timeout=2)
     if 'Server is already running' in output:
         pass
     elif 'No valid sound driver' in output:
         _start_jack()
         sleep(.5)
-        print(bh.run_output('mocp --server'))
+        print(bh.run_output('mocp --server', timeout=2))
     elif 'It seems that the server is already running' in output:
         rm_pid_and_kill_jack()
         if n < max_calls:
@@ -41,9 +41,8 @@ def start_server(n=1, max_calls=3):
         print(output)
 
 
-
 def get_info_dict():
-    output = bh.run_output('mocp --info')
+    output = bh.run_output('mocp --info', timeout=2)
     return dict([
         (k.lower(), v.strip())
         for k, v in [
@@ -58,6 +57,8 @@ def info_string(template='{currenttime} ({currentsec}) of {totaltime} into {file
     make_string = ih.get_string_maker(template)
     current_info = get_info_dict()
     if 'fatal_error' in current_info:
+        return ''
+    elif 'timeout' in current_info:
         return ''
     elif current_info.get('state') == 'STOP':
         return ''
@@ -107,7 +108,7 @@ def find_and_play(*paths):
         print('No files found matching {}'.format(repr(paths)))
         return
     start_server()
-    output = bh.run_output('mocp --playit {}'.format(found))
+    output = bh.run_output('mocp --playit {}'.format(found), timeout=10)
     if output:
         print(output)
 
@@ -126,7 +127,10 @@ def find_select_and_play(*paths):
         )
         if selected:
             start_server()
-            output = bh.run_output('mocp --playit {}'.format(' '.join(selected)))
+            output = bh.run_output(
+                'mocp --playit {}'.format(' '.join(selected)),
+                timeout=10
+            )
             if output:
                 print(output)
     else:
@@ -134,7 +138,7 @@ def find_select_and_play(*paths):
 
 
 def toggle_pause():
-    output = bh.run_output('mocp --toggle-pause')
+    output = bh.run_output('mocp --toggle-pause', timeout=2)
     if 'server is not running' in output:
         start_server()
     elif output:
@@ -143,7 +147,7 @@ def toggle_pause():
 
 def seek(n):
     """Move forward or backwaard by n seconds"""
-    output = bh.run_output('mocp --seek {}'.format(n))
+    output = bh.run_output('mocp --seek {}'.format(n), timeout=2)
     if 'server is not running' in output:
         start_server()
     elif output:
@@ -162,7 +166,7 @@ def go(timestamp):
     if get_info_dict().get('state') == 'PAUSE':
         toggle_pause()
 
-    output = bh.run_output('mocp --jump {}s'.format(seconds))
+    output = bh.run_output('mocp --jump {}s'.format(seconds), timeout=2)
     if 'server is not running' in output:
         start_server()
     elif 'Segmentation fault' in output:
@@ -172,7 +176,7 @@ def go(timestamp):
 
 
 def volume_up(n=5):
-    output = bh.run_output('mocp --volume +{}'.format(n))
+    output = bh.run_output('mocp --volume +{}'.format(n), timeout=2)
     if 'server is not running' in output:
         start_server()
     elif output:
@@ -180,7 +184,7 @@ def volume_up(n=5):
 
 
 def volume_down(n=5):
-    output = bh.run_output('mocp --volume -{}'.format(n))
+    output = bh.run_output('mocp --volume -{}'.format(n), timeout=2)
     if 'server is not running' in output:
         start_server()
     elif output:
@@ -188,7 +192,7 @@ def volume_down(n=5):
 
 
 def volume(n):
-    output = bh.run_output('mocp --volume {}'.format(n))
+    output = bh.run_output('mocp --volume {}'.format(n), timeout=2)
     if 'server is not running' in output:
         start_server()
     elif output:
@@ -196,7 +200,7 @@ def volume(n):
 
 
 def next():
-    output = bh.run_output('mocp --next')
+    output = bh.run_output('mocp --next', timeout=2)
     if 'server is not running' in output:
         start_server()
     elif output:
@@ -204,7 +208,7 @@ def next():
 
 
 def previous():
-    output = bh.run_output('mocp --previous')
+    output = bh.run_output('mocp --previous', timeout=2)
     if 'server is not running' in output:
         start_server()
     elif output:
@@ -212,7 +216,7 @@ def previous():
 
 
 def stop():
-    output = bh.run_output('mocp --stop')
+    output = bh.run_output('mocp --stop', timeout=2)
     if 'server is not running' in output:
         pass
     elif output:
@@ -220,7 +224,7 @@ def stop():
 
 
 def stop_server():
-    output = bh.run_output('mocp --exit')
+    output = bh.run_output('mocp --exit', timeout=2)
     if 'server is not running' in output:
         pass
     elif output:
